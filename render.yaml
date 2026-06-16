@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: healthcare-portal
+    env: python
+    region: oregon
+    plan: free
+    branch: main
+    runtime: python-3.10
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: cd backend && python main.py
+    envVars:
+      - key: ENV
+        value: production
+      - key: PYTHON_VERSION
+        value: 3.10.13
+      - key: HOST
+        value: 0.0.0.0
+      # Add your Supabase credentials here (get from your .env file)
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false

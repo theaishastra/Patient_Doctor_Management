@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./venv/Scripts/python.exe -m uvicorn main:app --host 127.0.0.1 --port 8000)",
+      "Bash(./venv/Scripts/python.exe -c ' *)",
+      "Bash(taskkill //F //IM python.exe)",
+      "Bash(./venv/Scripts/python.exe -c \"from database import supabase_admin; res = supabase_admin.table\\('chat_messages'\\).select\\('*'\\).limit\\(1\\).execute\\(\\); print\\('OK', res.data\\)\")"
+    ]
+  }
+}

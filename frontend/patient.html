@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Dashboard - MedVitals</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .patient-layout-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+        }
+        @media (max-width: 900px) {
+            .patient-layout-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .doctor-card {
+            border: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+            padding: 1.25rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow-sm);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="brand-header">
+                <div class="brand-dot"></div>
+                MedVitals Portal
+            </div>
+            <ul class="sidebar-menu">
+                <li><a class="menu-item active" onclick="showSection('healthcard')" id="menu-healthcard">My Health Card</a></li>
+                <li><a class="menu-item" onclick="showSection('documents')" id="menu-documents">My Documents</a></li>
+                <li><a class="menu-item" onclick="showSection('chat')" id="menu-chat">Chat with Doctor</a></li>
+                <li><a class="menu-item" onclick="showSection('profile')" id="menu-profile">Update Vitals</a></li>
+                <li><a class="menu-item" onclick="showSection('credentials')" id="menu-credentials">Credentials</a></li>
+            </ul>
+            <div class="sidebar-user">
+                <span class="user-name" id="patient-name">Patient Name</span>
+                <span class="user-email" id="patient-email">patient@example.com</span>
+                <button onclick="logout()" class="btn btn-secondary" style="margin-top: 1rem; width: 100%; border-color: rgba(255,255,255,0.2); color: #ffffff;">
+                    Log Out
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Top Nav Bar -->
+            <div class="top-bar">
+                <div class="top-bar-title" id="page-title">My Health Card</div>
+                <div class="badge badge-patient">Patient Portal</div>
+            </div>
+
+            <!-- View Sections -->
+            <div class="dashboard-view">
+
+                <!-- 1. Health Card Section -->
+                <section id="section-healthcard" class="view-section">
+                    <!-- Patient Profile Header Vitals -->
+                    <div class="patient-header-card">
+                        <h2 id="vital-name">John Doe</h2>
+                        <p id="vital-email">john.doe@example.com</p>
+                        <div class="patient-info-row">
+                            <div class="patient-info-item">D.O.B: <strong id="vital-dob">N/A</strong></div>
+                            <div class="patient-info-item">Gender: <strong id="vital-gender">N/A</strong></div>
+                            <div class="patient-info-item">Blood Group: <strong id="vital-blood">N/A</strong></div>
+                            <div class="patient-info-item">Contact: <strong id="vital-phone">N/A</strong></div>
+                            <div class="patient-info-item">Emergency Contact: <strong id="vital-emergency">N/A</strong></div>
+                        </div>
+                    </div>
+
+                    <div class="patient-layout-grid">
+                        <!-- Left: Prescriptions & Treatments -->
+                        <div class="panel">
+                            <div class="panel-header">
+                                <h3>Prescribed Treatments & Medicines</h3>
+                            </div>
+                            <div class="treatment-cards-grid" id="treatments-timeline">
+                                <div class="empty-state">No treatment plans or medicines prescribed yet.</div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Assigned Doctors Info -->
+                        <div class="panel">
+                            <div class="panel-header">
+                                <h3>My Assigned Doctors</h3>
+                            </div>
+                            <div id="assigned-doctors-list">
+                                <div class="empty-state" style="padding: 1.5rem 0;">No doctors assigned to you yet.</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. Documents Repository Section -->
+                <section id="section-documents" class="view-section" style="display: none;">
+                    <div class="patient-layout-grid">
+                        <!-- Left: List of documents -->
+                        <div class="panel">
+                            <div class="panel-header">
+                                <h3>Uploaded Medical Reports & Records</h3>
+                            </div>
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>File Name</th>
+                                            <th>Description</th>
+                                            <th>Date Uploaded</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="documents-tbody">
+                                        <tr>
+                                            <td colspan="4" class="empty-state">Loading document records...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Right: Document Upload Card -->
+                        <div class="panel">
+                            <div class="panel-header">
+                                <h3>Upload New Record</h3>
+                            </div>
+                            <form id="upload-doc-form" onsubmit="uploadDocumentFile(event)">
+                                <div class="form-group">
+                                    <label>Choose File (PDF, Image, Audio or Video)</label>
+                                    <div class="upload-dropzone" onclick="document.getElementById('doc-file-input').click()" id="dropzone-area">
+                                        <p id="dropzone-text">📂 Click to browse or select a PDF, image, audio or video file</p>
+                                        <span id="selected-filename" class="text-teal" style="font-weight:600; display:block; margin-top:0.5rem; font-size:0.8rem;"></span>
+                                    </div>
+                                    <input type="file" id="doc-file-input" accept=".pdf,image/*,audio/*,video/*" style="display: none;" onchange="onFileSelected(this)" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="doc-description">File Description</label>
+                                    <input type="text" id="doc-description" class="form-input" placeholder="e.g. Blood Test Report, Chest X-ray Report">
+                                </div>
+                                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;" id="upload-btn">
+                                    Upload Document
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3. Update Vitals Section -->
+                <section id="section-profile" class="view-section" style="display: none;">
+                    <div class="panel" style="max-width: 600px;">
+                        <div class="panel-header">
+                            <h3>Update Personal Details & Vitals</h3>
+                        </div>
+                        <form id="patient-profile-form" onsubmit="saveProfileSettings(event)">
+                            <div class="form-group">
+                                <label for="set-pat-name">Full Name</label>
+                                <input type="text" id="set-pat-name" class="form-input" disabled>
+                            </div>
+                            <div class="form-group">
+                                <label for="set-pat-email">Email Address</label>
+                                <input type="email" id="set-pat-email" class="form-input" disabled>
+                            </div>
+                            <div class="form-group">
+                                <label for="set-pat-dob">Date of Birth</label>
+                                <input type="date" id="set-pat-dob" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label for="set-pat-gender">Gender</label>
+                                <select id="set-pat-gender" class="form-input">
+                                    <option value="">Select Gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="set-pat-blood">Blood Group</label>
+                                <select id="set-pat-blood" class="form-input">
+                                    <option value="">Select Blood Group</option>
+                                    <option value="A+">A+</option>
+                                    <option value="A-">A-</option>
+                                    <option value="B+">B+</option>
+                                    <option value="B-">B-</option>
+                                    <option value="AB+">AB+</option>
+                                    <option value="AB-">AB-</option>
+                                    <option value="O+">O+</option>
+                                    <option value="O-">O-</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="set-pat-phone">Contact Number</label>
+                                <input type="text" id="set-pat-phone" class="form-input" placeholder="e.g. +1234567890">
+                            </div>
+                            <div class="form-group">
+                                <label for="set-pat-emergency">Emergency Contact (Name/Phone)</label>
+                                <input type="text" id="set-pat-emergency" class="form-input" placeholder="e.g. Jane Doe (+9876543210)">
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">Save Vitals</button>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- 4. Chat with Doctor Section -->
+                <section id="section-chat" class="view-section" style="display: none;">
+                    <div id="chat-doctor-list-view">
+                        <div class="panel">
+                            <div class="panel-header">
+                                <h3>My Doctors</h3>
+                            </div>
+                            <div class="chat-thread-list" id="chat-doctor-list">
+                                <div class="empty-state">Loading...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="chat-conversation-view" style="display: none;">
+                        <div class="panel chat-container">
+                            <div class="chat-header">
+                                <div>
+                                    <button class="btn btn-secondary" onclick="backToPatientChatList()">&larr; Back</button>
+                                    <strong id="chat-partner-name" style="margin-left: 0.75rem;">Doctor</strong>
+                                </div>
+                            </div>
+                            <div class="chat-messages" id="chat-messages-container"></div>
+                            <form class="chat-input-bar" id="chat-input-bar" onsubmit="sendChatText(event)">
+                                <button type="button" class="chat-attach-btn" onclick="document.getElementById('chat-file-input').click()" title="Attach file">📎</button>
+                                <input type="file" id="chat-file-input" style="display:none;" onchange="sendChatFile(this)">
+                                <button type="button" class="chat-attach-btn mic-btn" id="chat-mic-btn" onclick="toggleVoiceRecording()" title="Record voice note">🎤</button>
+                                <input type="text" id="chat-text-input" class="form-input" placeholder="Type a message...">
+                                <button type="submit" class="btn btn-primary">Send</button>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 5. Credentials Section -->
+                <section id="section-credentials" class="view-section" style="display: none;">
+                    <div class="panel" style="max-width: 500px;">
+                        <div class="panel-header">
+                            <h3>Change Password</h3>
+                        </div>
+                        <form id="change-password-form" onsubmit="changeOwnPassword(event)">
+                            <div class="form-group">
+                                <label for="cred-current-password">Current Password</label>
+                                <input type="password" id="cred-current-password" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="cred-new-password">New Password</label>
+                                <input type="password" id="cred-new-password" class="form-input" required minlength="6">
+                            </div>
+                            <div class="form-group">
+                                <label for="cred-confirm-password">Confirm New Password</label>
+                                <input type="password" id="cred-confirm-password" class="form-input" required minlength="6">
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">Update Password</button>
+                        </form>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Import Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/chat.js"></script>
+    <script src="js/patient.js"></script>
+</body>
+</html>

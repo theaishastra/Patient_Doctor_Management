@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Dashboard - MedVitals</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .patient-details-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        @media (max-width: 900px) {
+            .patient-details-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .history-card {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            background-color: var(--card-bg);
+            position: relative;
+        }
+        .history-card-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+        }
+        .history-badge {
+            background-color: var(--accent-light);
+            color: var(--accent-color);
+            padding: 0.2rem 0.5rem;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="brand-header">
+                <div class="brand-dot"></div>
+                MedVitals Doctor
+            </div>
+            <ul class="sidebar-menu">
+                <li><a class="menu-item active" onclick="showSection('patients')" id="menu-patients">My Patients</a></li>
+                <li><a class="menu-item" onclick="showSection('chat')" id="menu-chat">Patient Chats</a></li>
+                <li><a class="menu-item" onclick="showSection('settings')" id="menu-settings">Profile Settings</a></li>
+            </ul>
+            <div class="sidebar-user">
+                <span class="user-name" id="doctor-name">Doctor Name</span>
+                <span class="user-email" id="doctor-email">doctor@medvitals.com</span>
+                <button onclick="logout()" class="btn btn-secondary" style="margin-top: 1rem; width: 100%; border-color: rgba(255,255,255,0.2); color: #ffffff;">
+                    Log Out
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Top Nav Bar -->
+            <div class="top-bar">
+                <div class="top-bar-title" id="page-title">Assigned Patients</div>
+                <div class="badge badge-doctor">Medical Doctor</div>
+            </div>
+
+            <!-- View Sections -->
+            <div class="dashboard-view">
+
+                <!-- 1. Assigned Patients Section -->
+                <section id="section-patients" class="view-section">
+                    <!-- Default List View -->
+                    <div id="patient-list-view" class="panel">
+                        <div class="panel-header">
+                            <h3>Assigned Patients</h3>
+                        </div>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Patient Name</th>
+                                        <th>Gender</th>
+                                        <th>Blood Group</th>
+                                        <th>Date of Birth</th>
+                                        <th>Assigned Date</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="assigned-patients-tbody">
+                                    <tr>
+                                        <td colspan="6" class="empty-state">Loading assigned patients...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Detail Patient View (Hidden by default) -->
+                    <div id="patient-detail-view" style="display: none;">
+                        <button class="btn btn-secondary" onclick="backToPatientList()" style="margin-bottom: 1.5rem;">
+                            ← Back to Patient List
+                        </button>
+                        
+                        <div class="patient-header-card">
+                            <h2 id="det-patient-name">Patient Name</h2>
+                            <p id="det-patient-email">patient@example.com</p>
+                            <div class="patient-info-row">
+                                <div class="patient-info-item">Date of Birth: <strong id="det-patient-dob">N/A</strong></div>
+                                <div class="patient-info-item">Gender: <strong id="det-patient-gender">N/A</strong></div>
+                                <div class="patient-info-item">Blood Group: <strong id="det-patient-blood">N/A</strong></div>
+                                <div class="patient-info-item">Contact: <strong id="det-patient-phone">N/A</strong></div>
+                                <div class="patient-info-item">Emergency Contact: <strong id="det-patient-emergency">N/A</strong></div>
+                            </div>
+                        </div>
+
+                        <div class="patient-details-grid">
+                            <!-- Left: Uploaded Documents -->
+                            <div class="panel">
+                                <div class="panel-header">
+                                    <h3>Uploaded Medical Reports</h3>
+                                </div>
+                                <div class="table-container">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Document</th>
+                                                <th>Description</th>
+                                                <th>Uploaded</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="det-patient-docs-tbody">
+                                            <!-- Dynamic -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Right: Treatment Records & Actions -->
+                            <div class="panel">
+                                <div class="panel-header">
+                                    <h3>Treatment History & Prescriptions</h3>
+                                    <button class="btn btn-primary" onclick="openTreatmentModal()">+ Record Treatment</button>
+                                </div>
+                                <div class="history-list" id="det-patient-treatments-list">
+                                    <!-- Dynamic -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. Profile Settings Section -->
+                <section id="section-settings" class="view-section" style="display: none;">
+                    <div class="panel" style="max-width: 600px;">
+                        <div class="panel-header">
+                            <h3>Doctor Profile Settings</h3>
+                        </div>
+                        <form id="doctor-profile-form" onsubmit="saveProfileSettings(event)">
+                            <div class="form-group">
+                                <label for="set-doc-name">Full Name</label>
+                                <input type="text" id="set-doc-name" class="form-input" disabled>
+                            </div>
+                            <div class="form-group">
+                                <label for="set-doc-email">Email Address</label>
+                                <input type="email" id="set-doc-email" class="form-input" disabled>
+                            </div>
+                            <div class="form-group">
+                                <label for="set-doc-spec">Specialization</label>
+                                <input type="text" id="set-doc-spec" class="form-input" placeholder="e.g. Pediatrics, Dermatology">
+                            </div>
+                            <div class="form-group">
+                                <label for="set-doc-license">License Number</label>
+                                <input type="text" id="set-doc-license" class="form-input" placeholder="e.g., LIC-87654321">
+                            </div>
+                            <div class="form-group">
+                                <label for="set-doc-phone">Contact Number</label>
+                                <input type="text" id="set-doc-phone" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label for="set-doc-bio">Doctor Biography / Bio</label>
+                                <textarea id="set-doc-bio" class="form-input" rows="4" placeholder="Describe your background and expertise..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">Update Profile Settings</button>
+                        </form>
+                    </div>
+
+                    <div class="panel" style="max-width: 600px; margin-top: 1.5rem;">
+                        <div class="panel-header">
+                            <h3>Account Credentials</h3>
+                        </div>
+                        <form id="change-password-form" onsubmit="changeOwnPassword(event)">
+                            <div class="form-group">
+                                <label for="cred-current-password">Current Password</label>
+                                <input type="password" id="cred-current-password" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="cred-new-password">New Password</label>
+                                <input type="password" id="cred-new-password" class="form-input" required minlength="6">
+                            </div>
+                            <div class="form-group">
+                                <label for="cred-confirm-password">Confirm New Password</label>
+                                <input type="password" id="cred-confirm-password" class="form-input" required minlength="6">
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">Update Password</button>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- 3. Patient Chats Section -->
+                <section id="section-chat" class="view-section" style="display: none;">
+                    <div id="chat-patient-list-view">
+                        <div class="panel">
+                            <div class="panel-header">
+                                <h3>Patient Chats</h3>
+                            </div>
+                            <div class="chat-thread-list" id="chat-patient-list">
+                                <div class="empty-state">Loading...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="chat-conversation-view" style="display: none;">
+                        <div class="panel chat-container">
+                            <div class="chat-header">
+                                <div>
+                                    <button class="btn btn-secondary" onclick="backToChatList()">&larr; Back</button>
+                                    <strong id="chat-partner-name" style="margin-left: 0.75rem;">Patient</strong>
+                                </div>
+                            </div>
+                            <div class="chat-messages" id="chat-messages-container"></div>
+                            <form class="chat-input-bar" id="chat-input-bar" onsubmit="sendChatText(event)">
+                                <button type="button" class="chat-attach-btn" onclick="document.getElementById('chat-file-input').click()" title="Attach file">📎</button>
+                                <input type="file" id="chat-file-input" style="display:none;" onchange="sendChatFile(this)">
+                                <button type="button" class="chat-attach-btn mic-btn" id="chat-mic-btn" onclick="toggleVoiceRecording()" title="Record voice note">🎤</button>
+                                <input type="text" id="chat-text-input" class="form-input" placeholder="Type a message...">
+                                <button type="submit" class="btn btn-primary">Send</button>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- ==========================================
+         MODALS
+         ========================================== -->
+
+    <!-- Add/Edit Treatment Modal -->
+    <div id="treatment-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title" id="treatment-modal-title">Record New Treatment</span>
+                <button class="btn btn-secondary" onclick="closeModal('treatment-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="treatment-form" onsubmit="saveTreatment(event)">
+                    <input type="hidden" id="treatment-id">
+                    <div class="form-group">
+                        <label for="treat-diagnosis">Diagnosis / Clinical Condition</label>
+                        <input type="text" id="treat-diagnosis" class="form-input" placeholder="e.g. Acute Bronchitis, Type 2 Diabetes" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="treat-plan">Treatment Plan / Instructions</label>
+                        <textarea id="treat-plan" class="form-input" rows="3" placeholder="Describe lifestyle advice, diagnostic tests, or therapy instructions..." required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="treat-meds">Suggested Medicines & Dosage</label>
+                        <textarea id="treat-meds" class="form-input" rows="3" placeholder="e.g., Paracetamol 500mg - 1 tablet twice a day for 5 days" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="treat-notes">Private Notes (Optional)</label>
+                        <textarea id="treat-notes" class="form-input" rows="2" placeholder="Additional observations, follow-ups..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Save Treatment Record</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/chat.js"></script>
+    <script src="js/doctor.js"></script>
+</body>
+</html>

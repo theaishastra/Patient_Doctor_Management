@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - MedVitals</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="brand-header">
+                <div class="brand-dot"></div>
+                MedVitals Admin
+            </div>
+            <ul class="sidebar-menu">
+                <li><a class="menu-item active" onclick="showSection('dashboard')" id="menu-dashboard">Overview</a></li>
+                <li><a class="menu-item" onclick="showSection('doctors')" id="menu-doctors">Manage Doctors</a></li>
+                <li><a class="menu-item" onclick="showSection('patients')" id="menu-patients">Manage Patients</a></li>
+                <li><a class="menu-item" onclick="showSection('assignments')" id="menu-assignments">Doctor Assignments</a></li>
+                <li><a class="menu-item" onclick="showSection('chatmonitor')" id="menu-chatmonitor">Chat Monitor</a></li>
+                <li><a class="menu-item" onclick="showSection('logs')" id="menu-logs">System Audit Logs</a></li>
+            </ul>
+            <div class="sidebar-user">
+                <span class="user-name" id="admin-name">Admin User</span>
+                <span class="user-email" id="admin-email">admin@medvitals.com</span>
+                <button onclick="logout()" class="btn btn-secondary" style="margin-top: 1rem; width: 100%; border-color: rgba(255,255,255,0.2); color: #ffffff;">
+                    Log Out
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Top Nav Bar -->
+            <div class="top-bar">
+                <div class="top-bar-title" id="page-title">Dashboard Overview</div>
+                <div class="badge badge-admin">Administrator</div>
+            </div>
+
+            <!-- View Sections -->
+            <div class="dashboard-view">
+
+                <!-- 1. Overview Section -->
+                <section id="section-dashboard" class="view-section">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-info">
+                                <p>Total Doctors</p>
+                                <h3 id="stat-doctors-count">0</h3>
+                            </div>
+                            <div class="stat-icon">🩺</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-info">
+                                <p>Registered Patients</p>
+                                <h3 id="stat-patients-count">0</h3>
+                            </div>
+                            <div class="stat-icon">👤</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-info">
+                                <p>Recorded Treatments</p>
+                                <h3 id="stat-treatments-count">0</h3>
+                            </div>
+                            <div class="stat-icon">💊</div>
+                        </div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3>Recent Portal Activities</h3>
+                            <button class="btn btn-secondary" onclick="showSection('logs')">View All Logs</button>
+                        </div>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Timestamp</th>
+                                        <th>User Name</th>
+                                        <th>Role</th>
+                                        <th>Action</th>
+                                        <th>Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recent-logs-table-body">
+                                    <tr>
+                                        <td colspan="5" class="empty-state">Loading activities...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. Doctors Section -->
+                <section id="section-doctors" class="view-section" style="display: none;">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3>Registered Medical Staff</h3>
+                            <button class="btn btn-primary" onclick="openCreateUserModal('doctor')">+ Add Doctor</button>
+                        </div>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Doctor Name</th>
+                                        <th>Email</th>
+                                        <th>Specialization</th>
+                                        <th>License Number</th>
+                                        <th>Contact</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="doctors-table-body">
+                                    <!-- Populated dynamically: includes Edit + Reset Password actions -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3. Patients Section -->
+                <section id="section-patients" class="view-section" style="display: none;">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3>Registered Patient Database</h3>
+                            <button class="btn btn-primary" onclick="openCreateUserModal('patient')">+ Add Patient</button>
+                        </div>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Patient Name</th>
+                                        <th>Email</th>
+                                        <th>D.O.B</th>
+                                        <th>Gender</th>
+                                        <th>Blood Group</th>
+                                        <th>Contact</th>
+                                        <th>Emergency Contact</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="patients-table-body">
+                                    <!-- Populated dynamically: includes Edit + Reset Password actions -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 4. Assignments Section -->
+                <section id="section-assignments" class="view-section" style="display: none;">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3>Doctor-Patient Assignments</h3>
+                            <button class="btn btn-primary" onclick="openAssignmentModal()">+ Assign Patient</button>
+                        </div>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Doctor</th>
+                                        <th>Assigned Patient</th>
+                                        <th>Assigned Date</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="assignments-table-body">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 5. Audit Logs Section -->
+                <section id="section-logs" class="view-section" style="display: none;">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3>Complete System Audit Trail</h3>
+                        </div>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Timestamp</th>
+                                        <th>User Name</th>
+                                        <th>Role</th>
+                                        <th>Action</th>
+                                        <th>Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="all-logs-table-body">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 6. Chat Monitor Section -->
+                <section id="section-chatmonitor" class="view-section" style="display: none;">
+                    <div id="chatmonitor-list-view">
+                        <div class="panel">
+                            <div class="panel-header">
+                                <h3>All Doctor-Patient Chats</h3>
+                            </div>
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Doctor</th>
+                                            <th>Patient</th>
+                                            <th>Assigned Date</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="chatmonitor-table-body">
+                                        <!-- Populated dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="chatmonitor-conversation-view" style="display: none;">
+                        <div class="panel chat-container">
+                            <div class="chat-header">
+                                <div>
+                                    <button class="btn btn-secondary" onclick="backToChatMonitorList()">&larr; Back</button>
+                                    <strong id="chatmonitor-partner-name" style="margin-left: 0.75rem;">Chat</strong>
+                                </div>
+                                <button class="btn btn-secondary" onclick="downloadChatZip()">⬇ Download Chat (ZIP)</button>
+                            </div>
+                            <div class="chat-messages" id="chat-messages-container"></div>
+                            <form class="chat-input-bar" id="chat-input-bar" onsubmit="sendChatText(event)">
+                                <button type="button" class="chat-attach-btn" onclick="document.getElementById('chat-file-input').click()" title="Attach file">📎</button>
+                                <input type="file" id="chat-file-input" style="display:none;" onchange="sendChatFile(this)">
+                                <button type="button" class="chat-attach-btn mic-btn" id="chat-mic-btn" onclick="toggleVoiceRecording()" title="Record voice note">🎤</button>
+                                <input type="text" id="chat-text-input" class="form-input" placeholder="Type a message as Admin...">
+                                <button type="submit" class="btn btn-primary">Send</button>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- ==========================================
+         MODALS
+         ========================================== -->
+
+    <!-- Edit Doctor Modal -->
+    <div id="doctor-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title">Edit Doctor Credentials</span>
+                <button class="btn btn-secondary" onclick="closeModal('doctor-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-doctor-form" onsubmit="saveDoctor(event)">
+                    <input type="hidden" id="edit-doc-id">
+                    <div class="form-group">
+                        <label for="edit-doc-name">Full Name</label>
+                        <input type="text" id="edit-doc-name" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-doc-spec">Specialization</label>
+                        <input type="text" id="edit-doc-spec" class="form-input" placeholder="e.g., Cardiology, General Medicine">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-doc-license">License Number</label>
+                        <input type="text" id="edit-doc-license" class="form-input" placeholder="e.g., LIC-12345678">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-doc-phone">Contact Number</label>
+                        <input type="text" id="edit-doc-phone" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-doc-bio">Short Biography</label>
+                        <textarea id="edit-doc-bio" class="form-input" rows="3" placeholder="Doctor profile bio summary..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Patient Modal -->
+    <div id="patient-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title">Edit Patient Details</span>
+                <button class="btn btn-secondary" onclick="closeModal('patient-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-patient-form" onsubmit="savePatient(event)">
+                    <input type="hidden" id="edit-pat-id">
+                    <div class="form-group">
+                        <label for="edit-pat-name">Full Name</label>
+                        <input type="text" id="edit-pat-name" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-pat-dob">Date of Birth</label>
+                        <input type="date" id="edit-pat-dob" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-pat-gender">Gender</label>
+                        <select id="edit-pat-gender" class="form-input">
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-pat-blood">Blood Group</label>
+                        <select id="edit-pat-blood" class="form-input">
+                            <option value="">Select Blood Group</option>
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option>
+                            <option value="O+">O+</option>
+                            <option value="O-">O-</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-pat-phone">Contact Number</label>
+                        <input type="text" id="edit-pat-phone" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-pat-emergency">Emergency Contact (Name/Phone)</label>
+                        <input type="text" id="edit-pat-emergency" class="form-input">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Assignment Modal -->
+    <div id="assignment-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title">New Doctor-Patient Assignment</span>
+                <button class="btn btn-secondary" onclick="closeModal('assignment-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="create-assignment-form" onsubmit="saveAssignment(event)">
+                    <div class="form-group">
+                        <label for="assign-doctor-select">Select Medical Doctor</label>
+                        <select id="assign-doctor-select" class="form-input" required>
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="assign-patient-select">Select Patient</label>
+                        <select id="assign-patient-select" class="form-input" required>
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Assign Patient</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Password Modal -->
+    <div id="reset-password-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title">Reset User Password</span>
+                <button class="btn btn-secondary" onclick="closeModal('reset-password-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Resetting password for: <strong id="reset-pw-username"></strong></p>
+                <form id="reset-password-form" onsubmit="saveResetPassword(event)">
+                    <input type="hidden" id="reset-pw-user-id">
+                    <div class="form-group">
+                        <label for="reset-pw-new">New Password</label>
+                        <input type="password" id="reset-pw-new" class="form-input" required minlength="6">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Reset Password</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create User Modal (Add Doctor / Add Patient) -->
+    <div id="create-user-modal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title" id="create-user-modal-title">Add Doctor</span>
+                <button class="btn btn-secondary" onclick="closeModal('create-user-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="create-user-form" onsubmit="saveCreateUser(event)">
+                    <input type="hidden" id="create-user-role">
+                    <div class="form-group">
+                        <label for="create-user-name">Full Name</label>
+                        <input type="text" id="create-user-name" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="create-user-email">Email Address</label>
+                        <input type="email" id="create-user-email" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="create-user-password">Temporary Password</label>
+                        <input type="password" id="create-user-password" class="form-input" required minlength="6" placeholder="At least 6 characters">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;" id="create-user-btn-text">Create Account</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/chat.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>

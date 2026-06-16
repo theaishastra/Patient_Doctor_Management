@@ -1,0 +1,44 @@
+# Python virtual environment
+venv/
+env/
+.venv/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Environment files (use Render dashboard to set these)
+.env
+.env.local
+.env.*.local
+
+# Node modules (if any frontend build tools used)
+node_modules/
+npm-debug.log
+
+# Git and version control
+.git/
+.gitignore
+
+# Project files
+.claude/
+.claude.md
+*.jsonl
+
+# Temporary files
+*.tmp
+temp/

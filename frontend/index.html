@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedVitals - Healthcare Portal</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <div class="landing-wrapper">
+        <!-- Left Hero Panel -->
+        <div class="landing-hero">
+            <div class="brand-header" style="color: #ffffff;">
+                <div class="brand-dot" style="background-color: #0d9488;"></div>
+                MedVitals
+            </div>
+            <h1>Your health,<br>our absolute priority.</h1>
+            <p>A secure digital ecosystem connecting patients, doctors, and medical administrators. Seamlessly consult, diagnose, upload records, and manage treatments in one interface.</p>
+
+            <div class="hero-features">
+                <div class="hero-feat-card">
+                    <h4>For Patients</h4>
+                    <p>Access prescriptions, track diagnosis, and securely upload medical documents for your doctors.</p>
+                </div>
+                <div class="hero-feat-card">
+                    <h4>For Doctors</h4>
+                    <p>Manage assigned patients, view health histories, and prescribe treatments with ease.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Forms Panel -->
+        <div class="landing-form-container">
+            <div class="brand-header">
+                <div class="brand-dot"></div>
+                MedVitals Portal
+            </div>
+
+            <!-- Login Form -->
+            <form id="login-form" onsubmit="onLoginSubmit(event)">
+                <h3 style="margin-bottom: 0.5rem;">Welcome Back</h3>
+                <p class="text-muted" style="margin-bottom: 1.5rem; font-size: 0.875rem;">Enter your credentials to access your dashboard.</p>
+
+                <div class="form-group">
+                    <label for="login-email">Email Address</label>
+                    <input type="email" id="login-email" class="form-input" placeholder="you@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" class="form-input" placeholder="••••••••" required>
+                </div>
+
+                <div style="text-align: right; margin-top: -0.5rem; margin-bottom: 0.5rem;">
+                    <span class="text-teal" style="cursor:pointer; font-size:0.8rem;" onclick="switchTab('forgot')">Forgot password?</span>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;" id="login-btn-text">
+                    Sign In
+                </button>
+            </form>
+
+            <!-- Forgot Password Form -->
+            <form id="forgot-form" onsubmit="onForgotSubmit(event)" style="display: none;">
+                <h3 style="margin-bottom: 0.5rem;">Reset Password</h3>
+                <p class="text-muted" style="margin-bottom: 1.5rem; font-size: 0.875rem;">Enter your email address and we'll send you a link to reset your password.</p>
+
+                <div class="form-group">
+                    <label for="forgot-email">Email Address</label>
+                    <input type="email" id="forgot-email" class="form-input" placeholder="you@example.com" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;" id="forgot-btn-text">
+                    Send Reset Link
+                </button>
+
+                <div class="auth-toggle-link">
+                    <span onclick="switchTab('login')">Back to Sign In</span>
+                </div>
+            </form>
+
+            <div class="auth-toggle-link" style="margin-top: 0.5rem;">
+                Administrator? <span onclick="window.location.href='admin-login.html'">Sign in here</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase Realtime (for chat) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- API and Auth libraries -->
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+
+    <script>
+        // Check if user is already logged in, redirect accordingly
+        window.addEventListener("DOMContentLoaded", () => {
+            const user = getSessionUser();
+            const token = localStorage.getItem("access_token");
+            if (user && token) {
+                if (user.role === "admin") window.location.href = "admin.html";
+                else if (user.role === "doctor") window.location.href = "doctor.html";
+                else window.location.href = "patient.html";
+            }
+        });
+
+        function switchTab(mode) {
+            const loginForm = document.getElementById("login-form");
+            const forgotForm = document.getElementById("forgot-form");
+
+            loginForm.style.display = "none";
+            forgotForm.style.display = "none";
+
+            if (mode === "login") {
+                loginForm.style.display = "block";
+            } else if (mode === "forgot") {
+                forgotForm.style.display = "block";
+            }
+        }
+
+        async function onLoginSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById("login-email").value;
+            const password = document.getElementById("login-password").value;
+            const btnText = document.getElementById("login-btn-text");
+
+            btnText.disabled = true;
+            btnText.innerHTML = '<div class="spinner"></div> Signing In...';
+
+            try {
+                await handleLogin(email, password);
+            } catch (err) {
+                btnText.disabled = false;
+                btnText.innerHTML = 'Sign In';
+            }
+        }
+
+        async function onForgotSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById("forgot-email").value;
+            const btnText = document.getElementById("forgot-btn-text");
+
+            btnText.disabled = true;
+            btnText.innerHTML = '<div class="spinner"></div> Sending...';
+
+            try {
+                await handleForgotPassword(email);
+                document.getElementById("forgot-form").reset();
+            } catch (err) {
+                // error is already toasted
+            } finally {
+                btnText.disabled = false;
+                btnText.innerHTML = 'Send Reset Link';
+            }
+        }
+    </script>
+</body>
+</html>
