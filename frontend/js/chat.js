@@ -62,6 +62,15 @@ function closeChatThread() {
         clearInterval(chatState.pollInterval);
     }
 
+    // Try to unsubscribe from realtime if it's active
+    if (chatState.realtimeSubscription && typeof chatState.realtimeSubscription.unsubscribe === 'function') {
+        try {
+            chatState.realtimeSubscription.unsubscribe();
+        } catch (e) {
+            console.warn("Error unsubscribing:", e);
+        }
+    }
+
     chatState = {
         assignmentId: null,
         listEndpoint: null,
@@ -70,6 +79,7 @@ function closeChatThread() {
         currentUserId: null,
         canSend: true,
         pollInterval: null,
+        realtimeSubscription: null,
         lastMessageCount: 0
     };
 

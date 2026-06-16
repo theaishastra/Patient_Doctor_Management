@@ -22,7 +22,13 @@ const SUPABASE_URL = "https://lycbzpjckxdzuvpmtmsr.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx5Y2J6cGpja3hkeng1dnBtdG1zciIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzMwMzU0ODEwLCJleHAiOjE4ODgxMzI4MTB9.sJGfHdP8JFWiCN5c9CZXhGKr6xDqLkh-Ju3Z32bEKFE";
 
 // Initialize Supabase client for realtime subscriptions
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Check if Supabase library loaded (it comes from CDN)
+let supabase = null;
+if (window.supabase && typeof window.supabase.createClient === 'function') {
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+} else {
+    console.warn("Supabase library not loaded yet. Realtime chat will use polling instead.");
+}
 
 // Helper to get JWT token
 function getAuthToken() {
