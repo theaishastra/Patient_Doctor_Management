@@ -40,7 +40,15 @@ async def health_check():
     return {"status": "healthy", "message": "Healthcare Portal API is running successfully"}
 
 # Serve the frontend (HTML/CSS/JS) from the same server
-FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "..", "frontend")
+# Use absolute path to handle both local and production environments
+BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
+FRONTEND_DIR = os.path.join(os.path.dirname(BACKEND_DIR), "frontend")
+
+# If frontend directory doesn't exist, try alternative paths
+if not os.path.exists(FRONTEND_DIR):
+    # Try from root if running from backend directory
+    FRONTEND_DIR = os.path.join("/app", "frontend") if os.path.exists("/app") else "frontend"
+
 app.mount("/", StaticFiles(directory=FRONTEND_DIR, html=True), name="frontend")
 
 if __name__ == "__main__":
