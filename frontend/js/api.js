@@ -23,11 +23,12 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 // Initialize Supabase client for realtime subscriptions
 // Check if Supabase library loaded (it comes from CDN)
-let supabase = null;
+var supabase = null;
 if (window.supabase && typeof window.supabase.createClient === 'function') {
     supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    console.log("✓ Supabase Realtime initialized");
 } else {
-    console.warn("Supabase library not loaded yet. Realtime chat will use polling instead.");
+    console.warn("⚠ Supabase library not loaded. Chat will use polling instead.");
 }
 
 // Helper to get JWT token
