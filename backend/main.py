@@ -39,6 +39,16 @@ app.include_router(patient.router)
 async def health_check():
     return {"status": "healthy", "message": "Healthcare Portal API is running successfully"}
 
+@app.get("/api/debug/frontend")
+async def debug_frontend():
+    """Debug endpoint to check if frontend files are being served"""
+    return {
+        "frontend_dir": FRONTEND_DIR,
+        "frontend_exists": os.path.exists(FRONTEND_DIR),
+        "index_exists": os.path.exists(os.path.join(FRONTEND_DIR, "index.html")),
+        "files": os.listdir(FRONTEND_DIR) if os.path.exists(FRONTEND_DIR) else []
+    }
+
 # Serve the frontend (HTML/CSS/JS) from the same server
 # Use absolute path to handle both local and production environments
 BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
